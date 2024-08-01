@@ -2,9 +2,15 @@
 #define HEADER
 
 #include <ncursesw/ncurses.h>
-#include <fstream>
 #include <stdio.h>
+#include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+
+#define BUFFER std::vector<std::string>
+#define CTRL(key) ((key) & 0x1f)
+
+extern bool end;
 
 #endif
