@@ -1,0 +1,1 @@
+This is my attempt at making a code editor that I'll propably never finish
