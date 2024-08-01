@@ -12,11 +12,9 @@ void killInterface();
 class EditorWindow
 {
     public:
-        EditorWindow(int starty, int startx, int endy, int endx);
         BUFFER buffer;
-
-        void writeToWindow();
-        void processInput();
+        EditorWindow(int starty, int startx, int endy, int endx);
+        void processInput(wchar_t);
 
     private:
         WINDOW * window;
@@ -27,6 +25,7 @@ class EditorWindow
         signed int scrollY;
         signed int scrollX;
 
+        void writeToWindow();
         void typeChar(wchar_t key);
         void eraseChar();
         void newLine();

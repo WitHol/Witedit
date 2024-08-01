@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
     // Main loop
     while(true)
     {
-        mainWin.processInput();
+        mainWin.processInput(CTRL('q'));
 
         if(end) break;
     }

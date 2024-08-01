@@ -70,10 +70,8 @@ void EditorWindow::writeToWindow()
 
 // ----------------------------------------------------------------------------
 // A function, that gets user input and processes it.
-void EditorWindow::processInput()
+void EditorWindow::processInput(wchar_t input)
 {
-    wchar_t input = wgetch(window);
-
     // Looping over keys
     switch (input)
     {

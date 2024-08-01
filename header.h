@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <unistd.h>
 
 #define BUFFER std::vector<std::string>
 #define CTRL(key) ((key) & 0x1f)
