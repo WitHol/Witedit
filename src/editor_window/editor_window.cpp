@@ -74,10 +74,11 @@ void EditorWindow::writeToWindow()
 void EditorWindow::processInput(std::vector<int> keys)
 {
     static std::vector<int> previousKeys;
-    static unsigned long int waitingTime;
+    static unsigned long int waitingTime = 0;
 
 
-    if(waitingTime) goto skip;
+    if(waitingTime && keys == previousKeys) goto skip;
+    else waitingTime = 0;
 
     if(keys.size() == 0) goto skip;
 
@@ -93,9 +94,13 @@ void EditorWindow::processInput(std::vector<int> keys)
 
     skip:
 
-    previousKeys = keys;
+    if(waitingTime > 0)
+    {
+        --waitingTime;
+        _sleep(1);
+    }
 
-    _sleep(1);
+    previousKeys = keys;
 
     writeToWindow();
 }
@@ -116,7 +121,7 @@ void EditorWindow::eraseChar()
 
     if(cursorX == 0)
     {
-        moveCursor(4);
+        moveCursor(DirEnum::LEFT);
         buffer[cursorY].append(buffer[cursorY+1]);
         buffer.erase(buffer.begin() + cursorY + 1);
     }
@@ -134,7 +139,7 @@ void EditorWindow::newLine()
     std::string emptyString = "";
     buffer.insert(buffer.begin()+cursorY+1, emptyString);
     cursorX = 0;
-    ++cursorY;
+    moveCursor(DirEnum::DOWN);
 }
 
 // ----------------------------------------------------------------------------

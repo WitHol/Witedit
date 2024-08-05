@@ -6,7 +6,7 @@ which creates an ncurses window with editable text
 #ifndef EDITOR_WINDOW
 #define EDITOR_WINDOW
 
-#include "header.h"
+#include "../header.h"
 
 // A data type for the text buffer
 typedef std::vector<std::string> BUFFER;

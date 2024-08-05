@@ -15,12 +15,10 @@ This is the main header file included in every source file
 #include <algorithm>
 
 // Inner header files
-#include "editor_window.h"
+#include "editor_window/editor_window.h"
 #include "key_detection/key_definitions.h"
 #include "key_detection/key_detection.h"
 #include "extras.cpp"
-
-#define CTRL(key) ((key) & 0x1f) // Deprecated
 
 // A variavle for stopping the program afer ctrl-q
 extern bool end;
