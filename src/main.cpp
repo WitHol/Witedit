@@ -1,4 +1,6 @@
 #include "header.h"
+#include "editor_window/editor_window.h"
+#include "key_detection/key_detection.h"
 
 std::vector<std::string> readFile(std::string path);
 void writeFile(std::string path, std::string buffer);
@@ -23,7 +25,7 @@ int main(int argc, char * argv[])
     // Main loop
     while(true)
     {
-        mainWin.processInput(getKeys());
+        mainWin.processInput(getPrintableKeys(), getModifierKeys());
 
         if(end) break;
     }

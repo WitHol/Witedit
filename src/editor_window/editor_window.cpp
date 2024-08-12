@@ -1,5 +1,5 @@
 #include "editor_window.h"
-#include "header.h"
+
 
 // ----------------------------------------------------------------------------
 // Out-of-class functions for starting and ending ncurses mode
@@ -71,36 +71,36 @@ void EditorWindow::writeToWindow()
 
 // ----------------------------------------------------------------------------
 // A function, that gets user input and processes it.
-void EditorWindow::processInput(std::vector<int> keys)
+void EditorWindow::processInput(std::vector<int> printableKeys, ModifierKeys modifierKeys)
 {
-    static std::vector<int> previousKeys;
+    // These variable are for making the usual key typing pattern, where once a key is held,
+    // it first types the char, waits for a short duration of time and starts spamming the char
+    static std::vector<int> previousPrintableKeys = printableKeys;
+    ModifierKeys previousModifierKeys = modifierKeys;
     static unsigned long int waitingTime = 0;
 
+    ModifierKeys noModifiers;
+    ModifierKeys shiftOnly(true);
 
-    if(waitingTime && keys == previousKeys) goto skip;
-    else waitingTime = 0;
+    if(printableKeys.size() == 0) goto skip;
 
-    if(keys.size() == 0) goto skip;
-
-    if(!contains(keys, K_CONTROL) && !contains(keys, K_HOME) && !contains(keys, K_SHIFT))
+    if(modifierKeys == noModifiers)
     {
-        typeChar(keys[0]);
+        typeChar(printableKeys[0]);
     }
-    if(!contains(keys, K_CONTROL) && !contains(keys, K_HOME) && contains(keys, K_SHIFT))
+    else if (modifierKeys == shiftOnly)
     {
-        !contains(printableChars, keys[0]);
-        typeChar(keys[0] + ('A' - 'a'));
+        typeChar(shiftedChar(printableKeys[0]));
+    }
+    else
+    {
+        // Keyboard shortcuts go here
+
+        if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == 'Q')
+            end = true;
     }
 
     skip:
-
-    if(waitingTime > 0)
-    {
-        --waitingTime;
-        _sleep(1);
-    }
-
-    previousKeys = keys;
 
     writeToWindow();
 }

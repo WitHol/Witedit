@@ -13,14 +13,9 @@ This is the main header file included in every source file
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <bits/stdc++.h>
 
-// Inner header files
-#include "editor_window/editor_window.h"
-#include "key_detection/key_definitions.h"
-#include "key_detection/key_detection.h"
-#include "extras.cpp"
-
-// A variavle for stopping the program afer ctrl-q
+// This is for stopping the program
 extern bool end;
 
 #endif

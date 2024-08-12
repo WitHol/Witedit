@@ -7,6 +7,8 @@ which creates an ncurses window with editable text
 #define EDITOR_WINDOW
 
 #include "../header.h"
+#include "../extras/extras.h"
+#include "../key_detection/key_detection.h"
 
 // A data type for the text buffer
 typedef std::vector<std::string> BUFFER;
@@ -21,7 +23,7 @@ class EditorWindow
     public:
         BUFFER buffer;
         EditorWindow(int starty, int startx, int endy, int endx);
-        void processInput(std::vector<int> keys);
+        void processInput(std::vector<int> printableKeys, ModifierKeys modifierKeys);
 
     private:
         WINDOW * window;

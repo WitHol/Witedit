@@ -2,35 +2,44 @@
 #ifdef _WIN64
 
 #include "key_detection.h"
-#include "../header.h"
 
 #include <windows.h>
 
-std::vector<int> getKeys()
+std::vector<int> getPrintableKeys()
 {
-    std::vector<int> pressedKeys;
+    static std::vector<int> pressedKeys;
 
-    for (int key = 0x01; key < 0xfe; ++key) 
+    for(short i = 0x01; i < 0xfe; ++i)
     {
-        if (GetAsyncKeyState(key) & 0x8000) 
+        if(i == K_SHIFT || i == K_CONTROL || i == K_HOME) continue;
+
+        bool isKeyPressed = GetAsyncKeyState(i) & 0x8000;
+        bool containsKey = contains(pressedKeys, i);
+
+        if(isKeyPressed == containsKey) continue;
+
+        if(isKeyPressed)
         {
-            pressedKeys.push_back(key);
+            pressedKeys.insert(pressedKeys.begin(), i);
+        }
+        else
+        {
+            pressedKeys.erase(std::find(pressedKeys.begin(), pressedKeys.end(), i));
         }
     }
 
     return pressedKeys;
 }
 
-std::vector<int> printableChars
+ModifierKeys getModifierKeys()
 {
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 
-    'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'w', 'x', 'y', 'z'
-};
+    ModifierKeys modifierKeys;
 
-std::vector<int> shiftedChars
-{
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-    'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z'
-};
+    if(GetAsyncKeyState(K_SHIFT) & 0x8000) modifierKeys.shift = true;
+    if(GetAsyncKeyState(K_CONTROL) & 0x8000) modifierKeys.control = true;
+    if(GetAsyncKeyState(K_HOME) & 0x8000) modifierKeys.alt = true;
+
+    return modifierKeys;
+}
 
 #endif

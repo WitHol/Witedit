@@ -9,10 +9,28 @@ possible hotkeys
 #ifndef KEY_DETECTION
 #define KEY_DETECTION
 
-#include "..\header.h"
+#include "../header.h"
+#include "key_definitions.h"
+#include "../extras/extras.h"
 
-std::vector<int> getKeys();
+class ModifierKeys
+{
+    public:
+        bool shift;
+        bool control;
+        bool alt;
 
-extern std::vector<int> printableChars;
+        ModifierKeys(bool shift = false, bool control_ = false, bool alt_ = false)
+         : shift(shift), control(control), alt(alt) {}
+
+        bool operator==(const ModifierKeys& other)
+        {
+            return shift == other.shift && control == other.control && alt == other.alt;
+        }
+};
+
+std::vector<int> getPrintableKeys();
+
+ModifierKeys getModifierKeys();
 
 #endif
