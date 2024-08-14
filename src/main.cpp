@@ -2,7 +2,7 @@
 #include "editor_window/editor_window.h"
 #include "key_detection/key_detection.h"
 
-std::vector<std::string> readFile(std::string path);
+BUFFER readFile(std::string path);
 void writeFile(std::string path, std::string buffer);
 
 // ----------------------------------------------------------------------------
@@ -40,16 +40,17 @@ int main(int argc, char * argv[])
 // File operation functions
 BUFFER readFile(std::string path)
 {
-    std::vector<std::string> buffer;
+    BUFFER buffer;
 
-    std::ifstream file (path, std::ios::out);
+    std::wifstream file (path, std::ios::out);
+
     if(!file.is_open())
     {
-        std::printf("Failed to open the file\n");
+        std::cout << "Failed to open the file\n";
         return buffer;
     } 
 
-    std::string line;
+    std::wstring line;
     while(std::getline(file, line))
     {
         buffer.push_back(line);
@@ -59,20 +60,20 @@ BUFFER readFile(std::string path)
     return buffer;
 }
 
-void writeFile(std::string path, std::string buffer)
+void writeFile(std::string path, BUFFER buffer)
 {
-    std::ofstream file(path, std::ios::in | std::ios::ate);
-    if(!file.is_open()) std::printf("Failed to write to the file");
+    std::wofstream file(path, std::ios::in | std::ios::ate);
 
-    std::string line;
+    if(!file.is_open())
+    {
+        std::printf("Failed to write to the file");
+        return;
+    }
+
+    std::wstring line;
     for(int i = 0; i < buffer.size(); ++i)
     {
-        if(buffer[i] == (char)KEY_ENTER)
-        {
-            file << line;
-            continue;
-        }
-
-        line.push_back(buffer[i]);
+        file << line;
+        continue;
     }
 }

@@ -10,8 +10,11 @@ which creates an ncurses window with editable text
 #include "../extras/extras.h"
 #include "../key_detection/key_detection.h"
 
+#define FIRST_KEY_COOLDOWN 500
+#define SPAM_KEY_COOLDOWN 20
+
 // A data type for the text buffer
-typedef std::vector<std::string> BUFFER;
+typedef std::vector<std::wstring> BUFFER;
 
 void setupInterface();
 
@@ -23,7 +26,7 @@ class EditorWindow
     public:
         BUFFER buffer;
         EditorWindow(int starty, int startx, int endy, int endx);
-        void processInput(std::vector<int> printableKeys, ModifierKeys modifierKeys);
+        void processInput(std::vector<wchar_t> printableKeys, ModifierKeys modifierKeys);
 
     private:
         WINDOW * window;
@@ -35,9 +38,9 @@ class EditorWindow
         signed int scrollX;
 
         void writeToWindow();
-        void typeChar(int key);
+        void typeChar(wchar_t key);
         void eraseChar();
-        void newLine();
+        void newLine(bool moveLine);
         void moveCursor(DirEnum dir);
 };
 

@@ -19,17 +19,32 @@ class ModifierKeys
         bool shift;
         bool control;
         bool alt;
+        
+        bool lshift;
+        bool lcontrol;
+        bool lalt;
+        
+        bool rshift;
+        bool rcontrol;
+        bool ralt;
 
         ModifierKeys(bool shift = false, bool control_ = false, bool alt_ = false)
          : shift(shift), control(control), alt(alt) {}
 
         bool operator==(const ModifierKeys& other)
         {
-            return shift == other.shift && control == other.control && alt == other.alt;
+            return shift == other.shift && control == other.control && alt == other.alt &&
+                lshift == other.lshift && lcontrol == other.lcontrol && lalt == other.lalt &&
+                rshift == other.rshift && rcontrol == other.rcontrol && ralt == other.ralt;
+        }
+
+        bool operator!=(const ModifierKeys& other)
+        {
+            return !(*this == other);
         }
 };
 
-std::vector<int> getPrintableKeys();
+std::vector<wchar_t> getPrintableKeys();
 
 ModifierKeys getModifierKeys();
 

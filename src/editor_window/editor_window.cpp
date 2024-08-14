@@ -5,6 +5,8 @@
 // Out-of-class functions for starting and ending ncurses mode
 void setupInterface()
 {
+    setlocale(LC_CTYPE, "");
+
     initscr();
     raw();
     noecho();
@@ -26,7 +28,7 @@ EditorWindow::EditorWindow(int starty, int startx, int endy, int endx)
     wrefresh(window);
     keypad(window, TRUE);
 
-    std::string emptyString = "";
+    std::wstring emptyString;
     buffer.push_back(emptyString);
 
     cursorX = 0;
@@ -61,7 +63,10 @@ void EditorWindow::writeToWindow()
                 break;
             }
             
-            mvwaddch(window, i+1, j+1, buffer[i][j]);
+            cchar_t ccharChar;
+            attr_t ccharArtibutes;
+            setcchar(&ccharChar, &buffer[i][j], ccharArtibutes, 0, (void *)0);
+            mvwadd_wch(window, i+1, j+1, &ccharChar);
         }
     }
 
@@ -71,24 +76,32 @@ void EditorWindow::writeToWindow()
 
 // ----------------------------------------------------------------------------
 // A function, that gets user input and processes it.
-void EditorWindow::processInput(std::vector<int> printableKeys, ModifierKeys modifierKeys)
+void EditorWindow::processInput(std::vector<wchar_t> printableKeys, ModifierKeys modifierKeys)
 {
     // These variable are for making the usual key typing pattern, where once a key is held,
     // it first types the char, waits for a short duration of time and starts spamming the char
-    static std::vector<int> previousPrintableKeys = printableKeys;
-    ModifierKeys previousModifierKeys = modifierKeys;
-    static unsigned long int waitingTime = 0;
+    static std::vector<wchar_t> previousPrintableKeys;
+    static ModifierKeys previousModifierKeys;
+    static long previousClock;
+    static uint8_t typingPhase;
+    static int64_t cooldown;
 
-    ModifierKeys noModifiers;
-    ModifierKeys shiftOnly(true);
-
-    if(printableKeys.size() == 0) goto skip;
-
-    if(modifierKeys == noModifiers)
+    if(previousPrintableKeys != printableKeys || previousModifierKeys != modifierKeys) 
     {
-        typeChar(printableKeys[0]);
+        typingPhase = 0;
+        cooldown = 0;
     }
-    else if (modifierKeys == shiftOnly)
+
+    // If no keys are pressed or we're at a cooldown, there's no point in doing anything
+    if(printableKeys.size() == 0) goto skip;
+    if(cooldown > 0) goto skip;
+
+    if(modifierKeys.shift == false && modifierKeys.control == false && modifierKeys.alt == false)
+    {
+        if(printableKeys[0] == K_ENTER) newLine(true);
+        else typeChar(printableKeys[0]);
+    }
+    else if (modifierKeys.shift == true && modifierKeys.control == false && modifierKeys.alt == false)
     {
         typeChar(shiftedChar(printableKeys[0]));
     }
@@ -96,18 +109,38 @@ void EditorWindow::processInput(std::vector<int> printableKeys, ModifierKeys mod
     {
         // Keyboard shortcuts go here
 
-        if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == 'Q')
+        if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == 'q')
             end = true;
+
+        if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == K_ENTER)
+            newLine(false);
     }
 
     skip:
+
+    if(typingPhase == 0)
+    {
+        typingPhase = 1;
+        cooldown = FIRST_KEY_COOLDOWN;
+    }
+    else if(typingPhase == 1 && cooldown == 0) typingPhase = 2;
+    else if(typingPhase == 2 && cooldown == 0) cooldown = SPAM_KEY_COOLDOWN;
+
+    if(previousClock > clock()) previousClock = clock();
+    cooldown = cooldown - (clock() - previousClock);
+    if(cooldown < 0) cooldown = 0;
+
+
+    previousPrintableKeys = printableKeys;
+    previousModifierKeys = modifierKeys;
+    previousClock = clock();
 
     writeToWindow();
 }
 
 // ----------------------------------------------------------------------------
 // A function, that puts a desired char at cursor's position
-void EditorWindow::typeChar(int key)
+void EditorWindow::typeChar(wchar_t key)
 {
     buffer[cursorY].insert(cursorX, 1, key);
     moveCursor(DirEnum::RIGHT);
@@ -134,12 +167,20 @@ void EditorWindow::eraseChar()
 
 // ----------------------------------------------------------------------------
 // A function, that adds a new line after the one cursor is at
-void EditorWindow::newLine()
+void EditorWindow::newLine(bool moveLine)
 {
-    std::string emptyString = "";
-    buffer.insert(buffer.begin()+cursorY+1, emptyString);
+    std::wstring newLine;
+
+    if(moveLine)
+    {
+        newLine.append(buffer[cursorY].substr(cursorX));
+        buffer[cursorY].erase(buffer[cursorY].begin() + cursorX, buffer[cursorY].end());
+    }
+
+    buffer.insert(buffer.begin()+cursorY+1, newLine);
+    
     cursorX = 0;
-    moveCursor(DirEnum::DOWN);
+    cursorY += 1;
 }
 
 // ----------------------------------------------------------------------------
