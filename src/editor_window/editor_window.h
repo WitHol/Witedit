@@ -16,11 +16,6 @@ which creates an ncurses window with editable text
 // A data type for the text buffer
 typedef std::vector<std::wstring> BUFFER;
 
-void setupInterface();
-
-void killInterface();
-
-
 class EditorWindow
 {
     public:

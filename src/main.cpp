@@ -3,7 +3,7 @@
 #include "key_detection/key_detection.h"
 
 BUFFER readFile(std::string path);
-void writeFile(std::string path, std::string buffer);
+void writeFile(std::string path, BUFFER buffer);
 
 // ----------------------------------------------------------------------------
 // The main function
@@ -12,15 +12,24 @@ bool end = false;
 
 int main(int argc, char * argv[])
 {
-    // Creating the interface
-    setupInterface();
+    // Ncurses setup
+    initscr();
+    raw();
+    noecho();
+    keypad(stdscr, TRUE);
+    refresh();
 
     // Configuring different windows
     EditorWindow mainWin(0, 0, LINES, COLS); // The main window for writing
 
     // Opening the file
-    std::string path = "none.txt";
-    //mainWin.buffer = readFile(path);
+    if(argc < 2)
+    {
+        std::cout << "No file specified";
+        return -1;
+    }
+    std::string path = argv[0];
+    mainWin.buffer = readFile(path);
 
     // Main loop
     while(true)
@@ -30,8 +39,10 @@ int main(int argc, char * argv[])
         if(end) break;
     }
 
+    writeFile(path, mainWin.buffer);
+
     // End
-    killInterface();
+    endwin();
     return 0;
 }
 
@@ -42,38 +53,37 @@ BUFFER readFile(std::string path)
 {
     BUFFER buffer;
 
-    std::wifstream file (path, std::ios::out);
+    std::wifstream fileStream (path, std::ios::out);
 
-    if(!file.is_open())
+    if(!fileStream.is_open())
     {
         std::cout << "Failed to open the file\n";
         return buffer;
     } 
 
     std::wstring line;
-    while(std::getline(file, line))
+    while(std::getline(fileStream, line))
     {
         buffer.push_back(line);
     }
+    if(buffer.size() == 0) buffer.push_back(std::wstring());
 
-    file.close();
+    fileStream.close();
     return buffer;
 }
 
 void writeFile(std::string path, BUFFER buffer)
 {
-    std::wofstream file(path, std::ios::in | std::ios::ate);
+    std::wofstream fileStream(path, std::ios::in | std::ios::trunc);
 
-    if(!file.is_open())
+    if(!fileStream.is_open())
     {
         std::printf("Failed to write to the file");
         return;
     }
 
-    std::wstring line;
     for(int i = 0; i < buffer.size(); ++i)
     {
-        file << line;
-        continue;
+        fileStream << buffer[i] << '\n';
     }
 }

@@ -23,6 +23,10 @@ int mapKey(const int &virtualKey)
         // Baisically renames
         {VK_RETURN, K_ENTER},
         {VK_BACK, K_BACKSPACE},
+        {VK_RIGHT, K_ARROW_RIGHT},
+        {VK_LEFT, K_ARROW_LEFT},
+        {VK_UP, K_ARROW_UP},
+        {VK_DOWN, K_ARROW_DOWN},
 
         // Letters to lowercase
         {'A', 'a'},
@@ -50,8 +54,19 @@ int mapKey(const int &virtualKey)
         {'W', 'w'},
         {'X', 'x'},
         {'Y', 'y'},
-        {'Z', 'z'}
-    };
+        {'Z', 'z'},
+
+        // Non-printable
+        {VK_SHIFT, 0x0000},
+        {VK_CONTROL, 0x0000},
+        {VK_MENU, 0x0000},
+        {VK_LSHIFT, 0x0000},
+        {VK_LCONTROL, 0x0000},
+        {VK_LMENU, 0x0000},
+        {VK_RSHIFT, 0x0000},
+        {VK_RCONTROL, 0x0000},
+        {VK_RMENU, 0x0000},
+    {0, 0}};
 
     for(const std::pair<int, int> &keyPair : keysMap)
     {

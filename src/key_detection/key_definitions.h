@@ -16,10 +16,6 @@ These key definitions are copied from <windows.h>
 #define K_ESCAPE 0x1B
 #define K_SPACE 0x20
 #define K_HOME 0x24
-#define K_LEFT 0x25
-#define K_UP 0x26
-#define K_RIGHT 0x27
-#define K_DOWN 0x28
 #define K_INSERT 0x2D
 #define K_DELETE 0x2E
 #define K_LSHIFT 0xA0
@@ -30,5 +26,9 @@ These key definitions are copied from <windows.h>
 #define K_RMENU 0xA5
 #define K_ENTER 0x000D
 #define K_BACKSPACE 0x0008
+#define K_ARROW_RIGHT 0x0025
+#define K_ARROW_LEFT 0x0027
+#define K_ARROW_UP 0x0026
+#define K_ARROW_DOWN 0x0028
 
 #endif

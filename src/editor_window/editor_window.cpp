@@ -1,24 +1,5 @@
 #include "editor_window.h"
 
-
-// ----------------------------------------------------------------------------
-// Out-of-class functions for starting and ending ncurses mode
-void setupInterface()
-{
-    setlocale(LC_CTYPE, "");
-
-    initscr();
-    raw();
-    noecho();
-    refresh();
-    keypad(stdscr, TRUE);
-}
-
-void killInterface()
-{
-    endwin();
-}
-
 // ----------------------------------------------------------------------------
 // Constructor
 EditorWindow::EditorWindow(int starty, int startx, int endy, int endx)
@@ -27,9 +8,6 @@ EditorWindow::EditorWindow(int starty, int startx, int endy, int endx)
     box(window, 0, 0);
     wrefresh(window);
     keypad(window, TRUE);
-
-    std::wstring emptyString;
-    buffer.push_back(emptyString);
 
     cursorX = 0;
     cursorY = 0;
@@ -96,19 +74,27 @@ void EditorWindow::processInput(std::vector<wchar_t> printableKeys, ModifierKeys
     if(printableKeys.size() == 0) goto skip;
     if(cooldown > 0) goto skip;
 
+    // Normal typing
     if(modifierKeys.shift == false && modifierKeys.control == false && modifierKeys.alt == false)
     {
         if(printableKeys[0] == K_ENTER) newLine(true);
+        else if(printableKeys[0] == K_BACKSPACE) eraseChar();
+        else if(printableKeys[0] == K_ARROW_RIGHT) moveCursor(DirEnum::RIGHT);
+        else if(printableKeys[0] == K_ARROW_LEFT) moveCursor(DirEnum::LEFT);
+        else if(printableKeys[0] == K_ARROW_UP) moveCursor(DirEnum::UP);
+        else if(printableKeys[0] == K_ARROW_DOWN) moveCursor(DirEnum::DOWN);
         else typeChar(printableKeys[0]);
     }
+    // Typing with shift
     else if (modifierKeys.shift == true && modifierKeys.control == false && modifierKeys.alt == false)
     {
-        typeChar(shiftedChar(printableKeys[0]));
+        if(printableKeys[0] == K_ENTER) newLine(false);
+        else if(printableKeys[0] == K_BACKSPACE) eraseChar();
+        else typeChar(shiftedChar(printableKeys[0]));
     }
+    // Keyboard shortcuts
     else
     {
-        // Keyboard shortcuts go here
-
         if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == 'q')
             end = true;
 

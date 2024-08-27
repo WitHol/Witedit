@@ -48,4 +48,6 @@ std::vector<wchar_t> getPrintableKeys();
 
 ModifierKeys getModifierKeys();
 
+void disableConsoleOutput();
+
 #endif
