@@ -28,7 +28,7 @@ int main(int argc, char * argv[])
         std::cout << "No file specified";
         return -1;
     }
-    std::string path = argv[0];
+    std::string path = argv[1];
     mainWin.buffer = readFile(path);
 
     // Main loop
@@ -53,7 +53,7 @@ BUFFER readFile(std::string path)
 {
     BUFFER buffer;
 
-    std::wifstream fileStream (path, std::ios::out);
+    std::wifstream fileStream(path, std::ios::out);
 
     if(!fileStream.is_open())
     {
