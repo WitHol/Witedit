@@ -19,6 +19,9 @@ typedef std::vector<std::wstring> BUFFER;
 class EditorWindow
 {
     public:
+        int leftMargin;
+        int rightMargin;
+
         BUFFER buffer;
         EditorWindow(int starty, int startx, int endy, int endx);
         void processInput(std::vector<wchar_t> printableKeys, ModifierKeys modifierKeys);

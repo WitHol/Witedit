@@ -22,9 +22,6 @@ EditorWindow::EditorWindow(int starty, int startx, int endy, int endx)
 // A function for writing buffer contents into the window
 void EditorWindow::writeToWindow()
 {
-    int line = 0;
-    int column = 0;
-
     for(int i = scrollY; i < getmaxy(window)+scrollY-2; ++i)
     {
         for(int j = scrollX; j < getmaxx(window)+scrollX-2; ++j)
