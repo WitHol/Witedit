@@ -29,22 +29,16 @@ void EditorWindow::writeToWindow()
     {
         for(int j = scrollX; j < getmaxx(window)+scrollX-2; ++j)
         {
-            if(buffer.size() <= i)
+            if(buffer.size() <= i || buffer[i].size() <= j)
             {
-                mvwaddch(window, i+1, j+1, ' ');
-                break;
-            }
-
-            if(buffer[i].size() <= j)
-            {
-                mvwaddch(window, i+1, j+1, ' ');
-                break;
+                mvwaddch(window, i-scrollY+1, j-scrollX+1, ' ');
+                continue;
             }
             
             cchar_t ccharChar;
             attr_t ccharArtibutes;
             setcchar(&ccharChar, &buffer[i][j], ccharArtibutes, 0, (void *)0);
-            mvwadd_wch(window, i+1, j+1, &ccharChar);
+            mvwadd_wch(window, i-scrollY+1, j-scrollX+1, &ccharChar);
         }
     }
 
@@ -95,10 +89,13 @@ void EditorWindow::processInput(std::vector<wchar_t> printableKeys, ModifierKeys
     // Keyboard shortcuts
     else
     {
-        if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == 'q')
+        if(modifierKeys.control && !modifierKeys.shift && !modifierKeys.alt && printableKeys[0] == K_ARROW_UP) moveView(DirEnum::UP);
+        if(modifierKeys.control && !modifierKeys.shift && !modifierKeys.alt && printableKeys[0] == K_ARROW_DOWN) moveView(DirEnum::DOWN);
+
+        if(modifierKeys.control && !modifierKeys.shift && !modifierKeys.alt && printableKeys[0] == 'q')
             end = true;
 
-        if(modifierKeys.control == true && modifierKeys.shift == false && modifierKeys.alt == false && printableKeys[0] == K_ENTER)
+        if(modifierKeys.control && !modifierKeys.shift && !modifierKeys.alt && printableKeys[0] == K_ENTER)
             newLine(false);
     }
 
@@ -233,4 +230,14 @@ void EditorWindow::moveCursor(DirEnum dir)
             --cursorX;
             break;
     }
+}
+
+// ----------------------------------------------------------------------------
+// A function for moving the viwe (scrolling)
+void EditorWindow::moveView(DirEnum dir)
+{
+    if(dir == DirEnum::RIGHT) ++scrollX;
+    else if(dir == DirEnum::LEFT && scrollX > 0) --scrollX;
+    else if(dir == DirEnum::UP && scrollY > 0) -- scrollY;
+    else if(dir == DirEnum::DOWN) ++scrollY;
 }

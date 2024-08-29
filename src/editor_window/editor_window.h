@@ -37,6 +37,7 @@ class EditorWindow
         void eraseChar();
         void newLine(bool moveLine);
         void moveCursor(DirEnum dir);
+        void moveView(DirEnum dir);
 };
 
 #endif
