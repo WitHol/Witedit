@@ -10,7 +10,6 @@ possible hotkeys
 #define KEY_DETECTION
 
 #include "../header.h"
-#include "key_definitions.h"
 #include "../extras/extras.h"
 
 class ModifierKeys

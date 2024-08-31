@@ -1,53 +1,67 @@
-#include "editor_window.h"
+#include "terminal_windows.h"
 
 // ----------------------------------------------------------------------------
 // Constructor
-EditorWindow::EditorWindow(int starty, int startx, int endy, int endx)
+EditorWindow::EditorWindow(int starty, int startx, int endy, int endx, int rightMargin, int leftMargin, int topMargin, int bottomMargin)
 {
     window = newwin(endy-starty, endx-startx, starty, startx);
     box(window, 0, 0);
-    wrefresh(window);
+    //wrefresh(window);
     keypad(window, TRUE);
 
-    cursorX = 0;
-    cursorY = 0;
+    (*this).rightMargin = rightMargin;
+    (*this).leftMargin = leftMargin;
+    (*this).topMargin = topMargin;
+    (*this).bottomMargin = bottomMargin;
 
-    scrollX = 0;
-    scrollY = 0;
+    render();
+}
 
-    writeToWindow();
+// ----------------------------------------------------------------------------
+// The main loop function
+void EditorWindow::loop()
+{
+    processInput();
+    render();
+    wrefresh(window);
+
+    globalCursorY = cursorY + topMargin + 1;
+    globalCursorX = cursorX + rightMargin + 1;
 }
 
 // ----------------------------------------------------------------------------
 // A function for writing buffer contents into the window
-void EditorWindow::writeToWindow()
+void EditorWindow::render()
 {
-    for(int i = scrollY; i < getmaxy(window)+scrollY-2; ++i)
+    for(int i = scrollY; i < getmaxy(window) + scrollY - topMargin - bottomMargin - 2; ++i)
     {
-        for(int j = scrollX; j < getmaxx(window)+scrollX-2; ++j)
+        for(int j = scrollX; j < getmaxx(window) + scrollX - rightMargin - leftMargin - 2; ++j)
         {
+            int currentY = i - scrollY + topMargin + 1;
+            int currentX = j - scrollX + rightMargin + 1;
+
             if(buffer.size() <= i || buffer[i].size() <= j)
             {
-                mvwaddch(window, i-scrollY+1, j-scrollX+1, ' ');
+                mvwaddch(window, currentY, currentX, ' ');
                 continue;
             }
-            
+
             cchar_t ccharChar;
             attr_t ccharArtibutes;
             setcchar(&ccharChar, &buffer[i][j], ccharArtibutes, 0, (void *)0);
-            mvwadd_wch(window, i-scrollY+1, j-scrollX+1, &ccharChar);
+            mvwadd_wch(window, currentY, currentX, &ccharChar);
         }
     }
-
-    wmove(window, cursorY-scrollY+1, cursorX-scrollX+1);
-    wrefresh(window);
 }
 
 // ----------------------------------------------------------------------------
 // A function, that gets user input and processes it.
-void EditorWindow::processInput(std::vector<wchar_t> printableKeys, ModifierKeys modifierKeys)
+void EditorWindow::processInput()
 {
-    // These variable are for making the usual key typing pattern, where once a key is held,
+    std::vector<wchar_t> printableKeys = getPrintableKeys();
+    ModifierKeys modifierKeys = getModifierKeys();
+
+    // This code is for making the usual key typing pattern, where once a key is held,
     // it first types the char, waits for a short duration of time and starts spamming the char
     static std::vector<wchar_t> previousPrintableKeys;
     static ModifierKeys previousModifierKeys;
@@ -70,6 +84,7 @@ void EditorWindow::processInput(std::vector<wchar_t> printableKeys, ModifierKeys
     {
         if(printableKeys[0] == K_ENTER) newLine(true);
         else if(printableKeys[0] == K_BACKSPACE) eraseChar();
+        else if(printableKeys[0] == K_DELETE) { moveCursor(DirEnum::RIGHT); eraseChar(); }
         else if(printableKeys[0] == K_ARROW_RIGHT) moveCursor(DirEnum::RIGHT);
         else if(printableKeys[0] == K_ARROW_LEFT) moveCursor(DirEnum::LEFT);
         else if(printableKeys[0] == K_ARROW_UP) moveCursor(DirEnum::UP);
@@ -98,24 +113,17 @@ void EditorWindow::processInput(std::vector<wchar_t> printableKeys, ModifierKeys
 
     skip:
 
-    if(typingPhase == 0)
-    {
-        typingPhase = 1;
-        cooldown = FIRST_KEY_COOLDOWN;
-    }
+    // Key typing pattern code
+    if(typingPhase == 0) {typingPhase = 1; cooldown = FIRST_KEY_COOLDOWN;}
     else if(typingPhase == 1 && cooldown == 0) typingPhase = 2;
     else if(typingPhase == 2 && cooldown == 0) cooldown = SPAM_KEY_COOLDOWN;
-
     if(previousClock > clock()) previousClock = clock();
     cooldown = cooldown - (clock() - previousClock);
     if(cooldown < 0) cooldown = 0;
 
-
     previousPrintableKeys = printableKeys;
     previousModifierKeys = modifierKeys;
     previousClock = clock();
-
-    writeToWindow();
 }
 
 // ----------------------------------------------------------------------------

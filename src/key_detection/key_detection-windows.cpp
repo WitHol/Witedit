@@ -27,6 +27,7 @@ int mapKey(const int &virtualKey)
         {VK_LEFT, K_ARROW_LEFT},
         {VK_UP, K_ARROW_UP},
         {VK_DOWN, K_ARROW_DOWN},
+        {VK_DELETE, K_DELETE},
 
         // Letters to lowercase
         {'A', 'a'},

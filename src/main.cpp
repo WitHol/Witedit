@@ -1,89 +1,58 @@
 #include "header.h"
-#include "editor_window/editor_window.h"
+#include "terminal_windows/terminal_windows.h"
 #include "key_detection/key_detection.h"
-
-BUFFER readFile(std::string path);
-void writeFile(std::string path, BUFFER buffer);
+#include "file_management/file_management.h"
 
 // ----------------------------------------------------------------------------
 // The main function
 
 bool end = false;
 
+int globalCursorY;
+int globalCursorX;
+
 int main(int argc, char * argv[])
 {
     // Ncurses setup
     initscr();
-    raw();
-    noecho();
-    keypad(stdscr, TRUE);
     refresh();
 
     // Configuring different windows
-    EditorWindow mainWin(0, 0, LINES, COLS); // The main window for writing
+    EditorWindow mainWin(0, 0, LINES-3, COLS); // The main window for writing
+    TextWindow helpWin(LINES-3, 0, LINES, COLS, false);
 
-    // Opening the file
+    // Checking, whether a path was provided
     if(argc < 2)
     {
-        std::cout << "No file specified";
+        std::cout << "No file specified\n";
         return -1;
     }
-    std::string path = argv[1];
-    mainWin.buffer = readFile(path);
+ 
+    // Opening the file
+    Wited_TextFile mainFile;
+    mainFile.openFile(argv[1]);
+    mainWin.buffer = mainFile.readFile();
+
+    helpWin.buffer.push_back(L"  Press CTRL+Q to exit  |  Press CTRL+H for help");
 
     // Main loop
     while(true)
     {
-        mainWin.processInput(getPrintableKeys(), getModifierKeys());
+        curs_set(0);
 
+        helpWin.loop();
+        mainWin.loop();
+
+        move(globalCursorY, globalCursorX);
+        curs_set(1);
+        refresh();
         if(end) break;
     }
 
-    writeFile(path, mainWin.buffer);
+    mainFile.writeToFile(mainWin.buffer);
+    mainFile.closeFile();
 
     // End
     endwin();
     return 0;
-}
-
-
-// ----------------------------------------------------------------------------
-// File operation functions
-BUFFER readFile(std::string path)
-{
-    BUFFER buffer;
-
-    std::wifstream fileStream(path, std::ios::out);
-
-    if(!fileStream.is_open())
-    {
-        std::cout << "Failed to open the file\n";
-        return buffer;
-    } 
-
-    std::wstring line;
-    while(std::getline(fileStream, line))
-    {
-        buffer.push_back(line);
-    }
-    if(buffer.size() == 0) buffer.push_back(std::wstring());
-
-    fileStream.close();
-    return buffer;
-}
-
-void writeFile(std::string path, BUFFER buffer)
-{
-    std::wofstream fileStream(path, std::ios::in | std::ios::trunc);
-
-    if(!fileStream.is_open())
-    {
-        std::printf("Failed to write to the file");
-        return;
-    }
-
-    for(int i = 0; i < buffer.size(); ++i)
-    {
-        fileStream << buffer[i] << '\n';
-    }
 }
